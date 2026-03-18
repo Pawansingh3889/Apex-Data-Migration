@@ -1,0 +1,67 @@
+version: 2
+
+models:
+
+  - name: stg_server_logs
+    description: "Cleaned and typed server logs. Adds hour_of_day, is_peak_hour, is_timeout, is_high_cpu flags."
+    columns:
+      - name: logged_at
+        description: "Parsed timestamp"
+        tests:
+          - not_null
+      - name: query_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['SELECT', 'INSERT', 'UPDATE', 'DELETE']
+      - name: status
+        tests:
+          - accepted_values:
+              values: ['SUCCESS', 'TIMEOUT']
+      - name: execution_time_ms
+        tests:
+          - not_null
+      - name: server_cpu_load
+        tests:
+          - not_null
+
+  - name: stg_delivery_orders
+    description: "Delivery orders with geocoding, region, performance tier, and month sort key."
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - unique
+      - name: delivery_days
+        tests:
+          - not_null
+      - name: performance_flag
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Fast', 'Normal', 'Slow', 'Critical']
+      - name: country
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Brazil']
+      - name: region
+        tests:
+          - accepted_values:
+              values: ['North', 'Northeast', 'Centre-West', 'Southeast', 'South', 'Other']
+
+  - name: stg_reviews
+    description: "Customer reviews with Mistral sentiment labels. Invalid labels filtered out."
+    columns:
+      - name: review_id
+        tests:
+          - not_null
+          - unique
+      - name: sentiment
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Positive', 'Neutral', 'Negative']
+      - name: review_score
+        tests:
+          - not_null

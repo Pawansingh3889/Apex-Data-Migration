@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: fct_server_health
+    description: "Server health summary by risk level from Isolation Forest anomaly detection"
+    columns:
+      - name: risk_level
+        description: "CRITICAL / WARNING / OK classification"
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['CRITICAL', 'WARNING', 'OK']
+      - name: query_count
+        data_tests:
+          - not_null
+      - name: pct_of_total
+        data_tests:
+          - not_null
+      - name: timeout_rate_pct
+        data_tests:
+          - not_null
+
+  - name: fct_delivery_by_state
+    description: "Delivery performance aggregated by Brazilian state across 96K orders"
+    columns:
+      - name: customer_state
+        data_tests:
+          - not_null
+          - unique
+      - name: avg_delivery_days
+        data_tests:
+          - not_null
+
+  - name: dim_category_sentiment
+    description: "Product category sentiment scored by Mistral 7B on Portuguese reviews"
+    columns:
+      - name: category
+        data_tests:
+          - not_null
+          - unique
+      - name: dominant_sentiment
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Positive', 'Negative', 'Neutral']

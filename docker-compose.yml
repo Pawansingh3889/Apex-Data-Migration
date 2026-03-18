@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  apex-pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apex-pipeline
+    volumes:
+      - ./data:/apex/data
+      - ./images:/apex/images
+    environment:
+      - OLLAMA_HOST=http://172.23.80.1:11434
+      - PYTHONPATH=/apex
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    working_dir: /apex
+    command: python airflow_orchestration/apex_flow.py
+
+  prefect-server:
+    image: prefecthq/prefect:3-latest
+    container_name: apex-prefect-server
+    ports:
+      - "4200:4200"
+    command: prefect server start --host 0.0.0.0

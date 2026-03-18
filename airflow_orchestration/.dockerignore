@@ -1,0 +1,10 @@
+data/*.csv
+data/apex.duckdb
+data/figures/
+__pycache__
+.git
+*.ipynb_checkpoints
+_executed_*.ipynb
+.env
+*.pbix
+node_modules 

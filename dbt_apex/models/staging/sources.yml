@@ -1,0 +1,96 @@
+version: 2
+
+sources:
+  - name: apex
+    description: "Apex Data Migration — main DuckDB database (apex.duckdb)"
+    schema: main
+    tables:
+
+      - name: raw_logs
+        description: "15,000 synthetic SQL server logs generated in Phase 1. Two injected anomalies: orders index missing + evening traffic peak."
+        columns:
+          - name: timestamp
+            description: "Query execution timestamp (string, parsed downstream)"
+          - name: query_type
+            description: "SQL operation type"
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['SELECT', 'INSERT', 'UPDATE', 'DELETE']
+          - name: target_table
+            description: "Database table targeted by the query"
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['orders', 'customers', 'products', 'order_items', 'order_reviews']
+          - name: execution_time_ms
+            description: "Query execution time in milliseconds"
+            tests:
+              - not_null
+          - name: server_cpu_load
+            description: "Server CPU load at time of query (0-100)"
+            tests:
+              - not_null
+          - name: status
+            description: "Query outcome"
+            tests:
+              - accepted_values:
+                  values: ['SUCCESS', 'TIMEOUT']
+
+      - name: clean_logs
+        description: "ETL output from Phase 2. All raw_logs rows with 12 engineered features + Isolation Forest anomaly score and risk_level."
+        columns:
+          - name: risk_level
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['CRITICAL', 'WARNING', 'OK']
+          - name: is_anomaly
+            tests:
+              - not_null
+
+      - name: delivery
+        description: "96,470 real Olist e-commerce orders enriched with delivery metrics, Power BI columns, and Brazilian geocoding."
+        columns:
+          - name: order_id
+            tests:
+              - not_null
+              - unique
+          - name: delivery_days
+            tests:
+              - not_null
+          - name: is_late
+            tests:
+              - not_null
+          - name: performance_flag
+            tests:
+              - accepted_values:
+                  values: ['Fast', 'Normal', 'Slow', 'Critical']
+          - name: region
+            tests:
+              - accepted_values:
+                  values: ['North', 'Northeast', 'Centre-West', 'Southeast', 'South', 'Other']
+
+      - name: sentiment
+        description: "500 Olist customer reviews in Portuguese classified by Mistral 7B via Ollama."
+        columns:
+          - name: review_id
+            tests:
+              - not_null
+              - unique
+          - name: sentiment
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ['Positive', 'Neutral', 'Negative']
+          - name: review_score
+            tests:
+              - not_null
+
+      - name: category_sentiment
+        description: "Per-review product category sentiment (sentiment joined with Olist order_items + products)."
+        columns:
+          - name: sentiment
+            tests:
+              - accepted_values:
+                  values: ['Positive', 'Neutral', 'Negative']

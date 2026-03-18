@@ -1,0 +1,7 @@
+dbt_apex:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: C:/Projects/Apex-Data-Migration/data/apex.duckdb
+      threads: 1
